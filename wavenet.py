@@ -20,6 +20,39 @@ import librosa
 import pickle
 import glob
 
+"""
+spoken_digit Dataset Loader
+
+spoken_digit (https://www.tensorflow.org/datasets/catalog/spoken_digit)
+A free audio dataset of spoken digits. Think MNIST for audio.
+A simple audio/speech dataset consisting of recordings of spoken digits in wav files at 8kHz. The recordings are trimmed so that they have near minimal silence at the beginnings and ends.
+
+returns list_aud, list_label, list_fname
+"""
+def load_dataset():
+    if os.path.exists("dataset/spoken_digit/dataset_xy.pickle"):
+        with open("dataset/spoken_digit/dataset_xy.pickle", "rb") as f:
+            dataset_x, dataset_y, dataset_f = pickle.load(f)
+    else:
+        tfds.load('spoken_digit')
+        shutil.move("cache/downloads/extracted/TAR_GZ.Jako_free-spok-digi-data_arch_v1.0.9i8RM3hKdUFy7trNlwJ-AxmPyqndXivxjTmFBovhxAMA.tar.gz/free-spoken-digit-dataset-1.0.9/recordings", "dataset/spoken_digit/audio/")
+        
+        list_fname = []
+        list_aud = []
+        list_label = []
+
+        for fpath in glob.glob("dataset/spoken_digit/audio/*.wav"):
+            fname = fpath.split("/")[-1]
+            aud = librosa.load(fpath, sr=8000)[0]
+            label = int(fname.split("_")[0])
+
+            list_fname.append(fname)
+            list_aud.append(aud)
+            list_label.append(label)
+            
+        with open("dataset/spoken_digit/dataset_xy.pickle", "wb") as f:
+            pickle.dump([list_aud, list_label, list_fname], f)
+
 ################################################
 #TODO - CHECK IF OFFICIAL PARAMETER VALUES EXIST
 ################################################
