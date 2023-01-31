@@ -1,7 +1,3 @@
-###############################
-# WIP - NO TRAININIG / TEST YET
-###############################
-
 import os
 #os.environ["TF_GPU_ALLOCATOR"]="cuda_malloc_async"
 #os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"
@@ -90,10 +86,6 @@ def WaveNet(input_length = None, channels = 1, channel_size = 16, num_layers = 1
     x = tf.keras.layers.Conv1D(1, 1, strides=1, padding="same", use_bias=False, name="SkipConnections_conv_2")(x)
     x = tf.keras.layers.Flatten(name = "SkipConnections_flatten")(x)
     outputs = tf.keras.layers.Softmax(name= "outputs")(x)
-    
-    
-    #x = tf.keras.layers.GlobalAveragePooling1D()(x)
-    #outputs = tf.keras.layers.Dense(16, name='predictions', activation='relu')(x)
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
 
