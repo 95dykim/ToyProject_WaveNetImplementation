@@ -96,6 +96,13 @@ def quantize_aud(x, max_n = 256):
     quantized = np.digitize( quantized, np.arange(max_n) / (max_n-1) ) - 1
     return quantized
 
+#A function to dequantize a list of predictions
+def dequantize_aud(x, max_n = 256):
+    dequantized = x / (max_n - 1)
+    dequantized = dequantized * 2 - 1
+    dequantized = (np.exp( dequantized * np.log(max_n) / np.sign(dequantized) ) - 1) / (max_n - 1) * np.sign(dequantized)
+    return dequantized
+
 # A function to quantize a list of audios to dataset_x, dataset_y
 def convert_to_dataset( list_aud, input_length=2000, win_stride=500 ):
     dataset_x = []
