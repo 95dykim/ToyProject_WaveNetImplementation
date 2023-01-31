@@ -8,7 +8,11 @@ import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
+os.environ["TFDS_DATA_DIR"] = "./cache/"
+
 import tensorflow as tf
+import tensorflow_datasets as tfds
+
 import numpy as np
 
 ################################################
