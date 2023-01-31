@@ -102,13 +102,12 @@ def convert_to_dataset( list_aud, input_length=2000, win_stride=500 ):
     dataset_y = []
     
     for aud in list_aud:
-        for div in range(int(np.ceil( (len(aud) - input_length)/win_stride ))):
-            aud_div = aud[ div*win_stride : (div+1)*win_stride + input_length ]
-            
+        for div in range( 1 + max(0, int( np.ceil( ( len(aud) - input_length ) / win_stride ) )) ):
+            aud_div = aud[ div*win_stride : div*win_stride + input_length ]
             aud_pad = np.ones(input_length)
             aud_pad[:len(aud_div)] = aud_div
-                            
+
             dataset_x.append( aud_pad )
             dataset_y.append( quantize_aud(aud_pad) )
-            
+
     return np.stack(dataset_x), np.stack(dataset_y)
