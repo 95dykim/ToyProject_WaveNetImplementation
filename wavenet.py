@@ -102,8 +102,10 @@ def convert_to_dataset( list_aud, input_length=2000, win_stride=500 ):
     dataset_y = []
     
     for aud in list_aud:
-        for div in range( 1 + max(0, int( np.ceil( ( len(aud) - input_length ) / win_stride ) )) ):
-            aud_div = aud[ div*win_stride : div*win_stride + input_length ]
+        aud_n = librosa.util.normalize(aud)
+        
+        for div in range( 1 + max(0, int( np.ceil( ( len(aud_n) - input_length ) / win_stride ) )) ):
+            aud_div = aud_n[ div*win_stride : div*win_stride + input_length ]
             aud_pad = np.ones(input_length)
             aud_pad[:len(aud_div)] = aud_div
 
