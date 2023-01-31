@@ -52,7 +52,8 @@ def load_dataset():
             
         with open("dataset/spoken_digit/dataset_xy.pickle", "wb") as f:
             pickle.dump([list_aud, list_label, list_fname], f)
-
+        shutil.rmtree("cache")
+            
 ################################################
 #TODO - CHECK IF OFFICIAL PARAMETER VALUES EXIST
 ################################################
