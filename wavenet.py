@@ -26,8 +26,8 @@ A free audio dataset of spoken digits. Think MNIST for audio.
 A simple audio/speech dataset consisting of recordings of spoken digits in wav files at 8kHz. The recordings are trimmed so that they have near minimal silence at the beginnings and ends.
 """
 def load_dataset():
-    if os.path.exists("dataset/spoken_digit/dataset_xy.pickle"):
-        with open("dataset/spoken_digit/dataset_xy.pickle", "rb") as f:
+    if os.path.exists("dataset/spoken_digit/dataset_xyf.pickle"):
+        with open("dataset/spoken_digit/dataset_xyf.pickle", "rb") as f:
             list_fname, list_aud, list_label = pickle.load(f)
             
         return list_aud, list_label, list_fname
@@ -48,7 +48,7 @@ def load_dataset():
             list_aud.append(aud)
             list_label.append(label)
             
-        with open("dataset/spoken_digit/dataset_xy.pickle", "wb") as f:
+        with open("dataset/spoken_digit/dataset_xyf.pickle", "wb") as f:
             pickle.dump([list_fname, list_aud, list_label], f)
         
         shutil.rmtree("cache")
