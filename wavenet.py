@@ -28,7 +28,7 @@ A simple audio/speech dataset consisting of recordings of spoken digits in wav f
 def load_dataset():
     if os.path.exists("dataset/spoken_digit/dataset_xyf.pickle"):
         with open("dataset/spoken_digit/dataset_xyf.pickle", "rb") as f:
-            list_fname, list_aud, list_label = pickle.load(f)
+            list_aud, list_label, list_fname = pickle.load(f)
             
         return list_aud, list_label, list_fname
     else:
@@ -49,7 +49,7 @@ def load_dataset():
             list_label.append(label)
             
         with open("dataset/spoken_digit/dataset_xyf.pickle", "wb") as f:
-            pickle.dump([list_fname, list_aud, list_label], f)
+            pickle.dump([list_aud, list_label, list_fname], f)
         
         shutil.rmtree("cache")
         
