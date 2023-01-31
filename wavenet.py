@@ -96,3 +96,27 @@ def WaveNet(input_length = None, channels = 1, channel_size = 16, num_layers = 1
     #outputs = tf.keras.layers.Dense(16, name='predictions', activation='relu')(x)
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
+
+#A function to quantize an audio to a list of labels
+def quantize_aud(x, max_n = 256):
+    quantized = np.sign( x ) * np.log( 1 + ( max_n - 1 ) * abs(x) ) / np.log( max_n )
+    quantized = ( quantized + 1 ) / 2
+    quantized = np.digitize( quantized, np.arange(max_n) / (max_n-1) ) - 1
+    return quantized
+
+# A function to quantize a list of audios to dataset_x, dataset_y
+def convert_to_dataset( list_aud, input_length=2000 ):
+    dataset_x = []
+    dataset_y = []
+    
+    for aud in list_aud:
+        for div in range(int(np.ceil(len(aud)/input_length))):
+            aud_div = aud[ div*input_length : (div+1)*input_length ]
+            
+            aud_pad = np.ones(input_length)
+            aud_pad[:len(aud_div)] = aud_div
+                            
+            dataset_x.append( aud_pad )
+            dataset_y.append( quantize_aud(aud_pad) )
+            
+    return np.stack(dataset_x), np.stack(dataset_y)
