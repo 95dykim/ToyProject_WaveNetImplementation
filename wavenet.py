@@ -30,7 +30,7 @@ def load_dataset():
         with open("dataset/spoken_digit/dataset_xy.pickle", "rb") as f:
             list_fname, list_aud, list_label = pickle.load(f)
             
-        return list_fname, list_aud, list_label
+        return list_aud, list_label, list_fname
     else:
         tfds.load('spoken_digit')
         shutil.move("cache/downloads/extracted/TAR_GZ.Jako_free-spok-digi-data_arch_v1.0.9i8RM3hKdUFy7trNlwJ-AxmPyqndXivxjTmFBovhxAMA.tar.gz/free-spoken-digit-dataset-1.0.9/recordings", "dataset/spoken_digit/audio/")
@@ -53,7 +53,7 @@ def load_dataset():
         
         shutil.rmtree("cache")
         
-        return list_fname, list_aud, list_label
+        return list_aud, list_label, list_fname
             
 ################################################
 #TODO - CHECK IF OFFICIAL PARAMETER VALUES EXIST
