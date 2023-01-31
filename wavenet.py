@@ -104,7 +104,7 @@ def dequantize_aud(x, max_n = 256):
     return dequantized
 
 # A function to quantize a list of audios to dataset_x, dataset_y
-def convert_to_dataset( list_aud, input_length=2000, win_stride=500 ):
+def convert_to_dataset( list_aud, input_length=2001, win_stride=500 ):
     dataset_x = []
     dataset_y = []
     
@@ -116,7 +116,7 @@ def convert_to_dataset( list_aud, input_length=2000, win_stride=500 ):
             aud_pad = np.ones(input_length)
             aud_pad[:len(aud_div)] = aud_div
 
-            dataset_x.append( aud_pad )
-            dataset_y.append( quantize_aud(aud_pad) )
+            dataset_x.append( quantize_aud(aud_pad[:-1]) )
+            dataset_y.append( quantize_aud(aud_pad[1:]) )
 
     return np.stack(dataset_x), np.stack(dataset_y)
