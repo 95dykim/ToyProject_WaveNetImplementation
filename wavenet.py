@@ -71,7 +71,7 @@ def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation
     #residual connection
     return tf.keras.layers.Add(name=name+"_residual")([x_1, x_2]), x_1
     
-def WaveNet(input_length = 2400, channels = 1, channel_size = 16, num_layers = 16, dilation_limit=128):
+def WaveNet(input_length = 2000, channels = 1, channel_size = 16, num_layers = 16, dilation_limit=128):
     inputs = tf.keras.Input(shape=(input_length, channels), name="inputs")
     x = inputs
     
