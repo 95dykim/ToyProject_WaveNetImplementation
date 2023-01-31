@@ -67,7 +67,7 @@ def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation
     #residual connection
     return tf.keras.layers.Add(name=name+"_residual")([x_1, x_2]), x_1
     
-def WaveNet(input_length = None, channels = 1, channel_size = 16, num_layers = 16, dilation_limit=32, max_n = 256):
+def WaveNet(input_length = None, channels = 1, channel_size = 64, num_layers = 16, dilation_limit=32, max_n=256):
     inputs = tf.keras.Input(shape=(input_length, channels), name="inputs")
     x = inputs
     
@@ -81,10 +81,10 @@ def WaveNet(input_length = None, channels = 1, channel_size = 16, num_layers = 1
     
     x = tf.keras.layers.Add(name = "SkipConnections")(list_skip)
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_1")(x)
-    x = tf.keras.layers.Conv1D(1, 1, strides=1, padding="same", use_bias=False, name="SkipConnections_conv_1")(x)
+    x = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=False, name="SkipConnections_conv_1")(x)
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_2")(x)
     x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=False, name="SkipConnections_conv_2")(x)
-#    x = tf.keras.layers.Flatten(name = "SkipConnections_flatten")(x)
+
     outputs = tf.keras.layers.Softmax(name= "outputs")(x)
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
