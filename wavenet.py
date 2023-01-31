@@ -71,7 +71,7 @@ def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation
     #residual connection
     return tf.keras.layers.Add(name=name+"_residual")([x_1, x_2]), x_1
     
-def WaveNet(input_length = 2000, channels = 1, channel_size = 16, num_layers = 16, dilation_limit=128):
+def WaveNet(input_length = None, channels = 1, channel_size = 16, num_layers = 16, dilation_limit=32):
     inputs = tf.keras.Input(shape=(input_length, channels), name="inputs")
     x = inputs
     
@@ -80,7 +80,7 @@ def WaveNet(input_length = 2000, channels = 1, channel_size = 16, num_layers = 1
     for idx in range(num_layers):
         x, x_skip = WaveNetBlock_NonConditional(x, channel_size, "WaveNetBlock_" + str(idx), dilation_rate = dilation_rate)
         
-        dilation_rate = 1 if dilation_rate == dilation_limit else dilation_rate*2
+        dilation_rate = 1 if dilation_rate >= dilation_limit else dilation_rate*2
         list_skip.append(x_skip)
     
     x = tf.keras.layers.Add(name = "SkipConnections")(list_skip)
@@ -96,5 +96,3 @@ def WaveNet(input_length = 2000, channels = 1, channel_size = 16, num_layers = 1
     #outputs = tf.keras.layers.Dense(16, name='predictions', activation='relu')(x)
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
-
-WaveNet().summary()
