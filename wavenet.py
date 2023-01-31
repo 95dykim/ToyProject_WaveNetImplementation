@@ -97,13 +97,13 @@ def quantize_aud(x, max_n = 256):
     return quantized
 
 # A function to quantize a list of audios to dataset_x, dataset_y
-def convert_to_dataset( list_aud, input_length=2000 ):
+def convert_to_dataset( list_aud, input_length=2000, win_stride=500 ):
     dataset_x = []
     dataset_y = []
     
     for aud in list_aud:
-        for div in range(int(np.ceil(len(aud)/input_length))):
-            aud_div = aud[ div*input_length : (div+1)*input_length ]
+        for div in range(int(np.ceil( (len(aud) - input_length)/win_stride ))):
+            aud_div = aud[ div*win_stride : (div+1)*win_stride + input_length ]
             
             aud_pad = np.ones(input_length)
             aud_pad[:len(aud_div)] = aud_div
