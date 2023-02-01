@@ -135,3 +135,62 @@ def convert_to_dataset( list_aud, input_length = GLOBAL_INPUT_LENGTH, win_stride
     return np.stack(dataset_x), np.stack(dataset_y)
 
 ########################################################################################################
+
+class DataSeq_Train(tf.keras.utils.Sequence):
+    def __init__(self, list_aud, input_length = GLOBAL_INPUT_LENGTH):
+        self.x = [ ]
+        for aud in list_aud:
+            if len(aud) >= (input_length + 1):
+                self.x.append(aud)
+            else:
+                #aud_pad = np.zeros(input_length + 1)
+                aud_pad = ( np.random.rand(input_length + 1) * 2 - 1 ) * 0.2
+                aud_pad[:len(aud)] = aud
+                self.x.append(aud_pad)
+        
+        self.y = [ quantize_aud(x[1:]) for x in self.x ]
+        self.x = [ x[:-1] for x in self.x ]
+        
+        self.input_length = input_length
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        window_start = np.random.randint( max( len(self.x[idx]) - self.input_length, 0 ) + 1 )
+        #return self.x[idx][window_start:window_start+self.input_length], self.y[idx][window_start:window_start+self.input_length]
+        return self.x[idx][window_start:window_start+self.input_length], self.y[idx][window_start:window_start+self.input_length][-1:]
+        
+def DataSet_Train(list_aud, input_length = GLOBAL_INPUT_LENGTH):
+    dataseq = DataSeq_Train(list_aud, input_length)
+    ds = tf.data.Dataset.from_generator( lambda: (x for x in dataseq),
+        output_signature=(
+            tf.TensorSpec(shape=(input_length, ), dtype=tf.float32),
+            tf.TensorSpec(shape=(1, ), dtype=tf.float32),
+        )
+    )
+    ds = ds
+    return ds
+
+########################################################################################################
+
+class DataSeq_Valid(tf.keras.utils.Sequence):
+    def __init__(self, list_aud, input_length = GLOBAL_INPUT_LENGTH):
+        self.x, self.y = convert_to_dataset(list_aud, input_length = input_length, win_stride = 500)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+        
+def DataSet_Valid(list_aud, input_length = GLOBAL_INPUT_LENGTH):
+    dataseq = DataSeq_Valid(list_aud, input_length)
+    ds = tf.data.Dataset.from_generator( lambda: (x for x in dataseq),
+        output_signature=(
+            tf.TensorSpec(shape=(input_length, ), dtype=tf.float32),
+            tf.TensorSpec(shape=(1, ), dtype=tf.float32),
+        )
+    )
+    ds = ds
+    return ds
