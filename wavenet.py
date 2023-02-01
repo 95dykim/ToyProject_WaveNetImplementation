@@ -124,8 +124,7 @@ def convert_to_dataset( list_aud, input_length = GLOBAL_INPUT_LENGTH, win_stride
     for aud in list_aud:
         for div in range( 1 + max(0, int( np.ceil( ( len(aud) - input_length + 1 ) / win_stride ) )) ):
             aud_div = aud[ div*win_stride : div*win_stride + input_length + 1 ]
-            aud_pad = ( np.random.rand(input_length + 1) * 2 - 1 ) * 0.2
-            #aud_pad = np.zeros(input_length+1)
+            aud_pad = np.zeros(input_length+1)
             aud_pad[:len(aud_div)] = aud_div
 
             dataset_x.append( aud_pad[:-1] )
@@ -143,8 +142,7 @@ class DataSeq_Train(tf.keras.utils.Sequence):
             if len(aud) >= (input_length + 1):
                 self.x.append(aud)
             else:
-                #aud_pad = np.zeros(input_length + 1)
-                aud_pad = ( np.random.rand(input_length + 1) * 2 - 1 ) * 0.2
+                aud_pad = np.zeros(input_length + 1)
                 aud_pad[:len(aud)] = aud
                 self.x.append(aud_pad)
         
