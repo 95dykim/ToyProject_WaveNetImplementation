@@ -68,7 +68,7 @@ def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation
     #ReLU applied after skip-connections, according to the paper
     return tf.keras.layers.Add(name=name+"_residual")([x_1, x]), x_1
     
-def WaveNet(input_length = None, channel_size = 64, num_layers = 33, dilation_limit=2048, max_n=256):
+def WaveNet(input_length = None, channel_size = 64, num_layers = 40, dilation_limit=512, max_n=256):
     inputs = tf.keras.Input(shape=(input_length, 1), name="inputs")
     x = inputs
     
