@@ -1,8 +1,8 @@
 import os
 #os.environ["TF_GPU_ALLOCATOR"]="cuda_malloc_async"
-#os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 os.environ["TFDS_DATA_DIR"] = "./cache/"
 
@@ -15,6 +15,9 @@ import shutil
 import librosa
 import pickle
 import glob
+
+GLOBAL_INPUT_LENGTH = 2000
+USE_BIAS = True
 
 """
 spoken_digit (https://www.tensorflow.org/datasets/catalog/spoken_digit)
@@ -55,22 +58,25 @@ def load_dataset():
 #TODO - CHECK IF OFFICIAL PARAMETER VALUES EXIST
 ################################################
 def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation_rate = 1):
-    x_1 = x
-    x_2 = x
+    x_1a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, activation="tanh", dilation_rate = dilation_rate, name=name+"_conv_tanh")(x)
+    x_1b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, activation="sigmoid", dilation_rate = dilation_rate, name=name+"_conv_sigmoid")(x)
     
-    x_1_a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=False, activation="tanh", dilation_rate = dilation_rate, name=name+"_conv_tanh")(x_1)
-    x_1_b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=False, activation="sigmoid", dilation_rate = dilation_rate, name=name+"_conv_sigmoid")(x_1)
-    
-    x_1 = tf.keras.layers.Multiply(name=name+"_mult")([ x_1_a, x_1_b ])
-    x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=False, name=name+"_conv_1x1")(x_1)
+    x_1 = tf.keras.layers.Multiply(name=name+"_mult")([x_1a, x_1b])
+    x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_1x1")(x_1)
     
     #residual connection
-    return tf.keras.layers.Add(name=name+"_residual")([x_1, x_2]), x_1
+    #ReLU applied after skip-connections, according to the paper
+    return tf.keras.layers.Add(name=name+"_residual")([x_1, x]), x_1
     
-def WaveNet(input_length = None, channels = 1, channel_size = 64, num_layers = 10, dilation_limit=256, max_n=256):
-    inputs = tf.keras.Input(shape=(input_length, channels), name="inputs")
+def WaveNet(input_length = None, channel_size = 64, num_layers = 11, dilation_limit=2048, max_n=256):
+    inputs = tf.keras.Input(shape=(input_length, 1), name="inputs")
     x = inputs
     
+    #Initial Conv
+    x = tf.keras.layers.Conv1D(channel_size, 2, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = 2, name="conv_initial")(x)
+    #NOTE - Activation?
+    
+    #WaveNet ResidualBlocks
     list_skip = []
     dilation_rate = 1
     for idx in range(num_layers):
@@ -79,15 +85,20 @@ def WaveNet(input_length = None, channels = 1, channel_size = 64, num_layers = 1
         dilation_rate = 1 if dilation_rate >= dilation_limit else dilation_rate*2
         list_skip.append(x_skip)
     
+    #Output layers
     x = tf.keras.layers.Add(name = "SkipConnections")(list_skip)
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_1")(x)
-    x = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=False, name="SkipConnections_conv_1")(x)
+    x = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name="SkipConnections_conv_1")(x)
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_2")(x)
-    x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=False, name="SkipConnections_conv_2")(x)
+    x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=USE_BIAS, name="SkipConnections_conv_2")(x)
 
-    outputs = tf.keras.layers.Softmax(name= "outputs")(x)
+    #x = tf.keras.layers.GlobalAveragePooling1D(name="gap")(x)
+    
+    outputs = tf.keras.layers.Softmax(name= "outputs")(x[:,-1])
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
+
+########################################################################################################
 
 #A function to quantize an audio to a list of labels
 def quantize_aud(x, max_n = 256):
@@ -103,20 +114,24 @@ def dequantize_aud(x, max_n = 256):
     dequantized = (np.exp( dequantized * np.log(max_n) / np.sign(dequantized) ) - 1) / (max_n - 1) * np.sign(dequantized)
     return dequantized
 
+########################################################################################################
+
 # A function to quantize a list of audios to dataset_x, dataset_y
-def convert_to_dataset( list_aud, input_length=2001, win_stride=100 ):
+def convert_to_dataset( list_aud, input_length = GLOBAL_INPUT_LENGTH, win_stride=2000 ):
     dataset_x = []
     dataset_y = []
     
     for aud in list_aud:
-        aud_n = librosa.util.normalize(aud)
-        
-        for div in range( 1 + max(0, int( np.ceil( ( len(aud_n) - input_length ) / win_stride ) )) ):
-            aud_div = aud_n[ div*win_stride : div*win_stride + input_length ]
-            aud_pad = np.ones(input_length)
+        for div in range( 1 + max(0, int( np.ceil( ( len(aud) - input_length + 1 ) / win_stride ) )) ):
+            aud_div = aud[ div*win_stride : div*win_stride + input_length + 1 ]
+            aud_pad = ( np.random.rand(input_length + 1) * 2 - 1 ) * 0.2
+            #aud_pad = np.zeros(input_length+1)
             aud_pad[:len(aud_div)] = aud_div
 
             dataset_x.append( aud_pad[:-1] )
-            dataset_y.append( quantize_aud(aud_pad[1:]) )
+            #dataset_y.append( quantize_aud(aud_pad[1:]) )
+            dataset_y.append( quantize_aud(aud_pad[-1:]) )
 
     return np.stack(dataset_x), np.stack(dataset_y)
+
+########################################################################################################
