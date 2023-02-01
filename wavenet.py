@@ -67,7 +67,7 @@ def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation
     #residual connection
     return tf.keras.layers.Add(name=name+"_residual")([x_1, x_2]), x_1
     
-def WaveNet(input_length = None, channels = 1, channel_size = 64, num_layers = 16, dilation_limit=32, max_n=256):
+def WaveNet(input_length = None, channels = 1, channel_size = 64, num_layers = 10, dilation_limit=256, max_n=256):
     inputs = tf.keras.Input(shape=(input_length, channels), name="inputs")
     x = inputs
     
@@ -104,7 +104,7 @@ def dequantize_aud(x, max_n = 256):
     return dequantized
 
 # A function to quantize a list of audios to dataset_x, dataset_y
-def convert_to_dataset( list_aud, input_length=2001, win_stride=500 ):
+def convert_to_dataset( list_aud, input_length=2001, win_stride=100 ):
     dataset_x = []
     dataset_y = []
     
