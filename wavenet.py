@@ -58,8 +58,8 @@ def WaveNetBlock_NonConditional(x, channel_size, name, kernel_size = 2, dilation
     x_1 = x
     x_2 = x
     
-    x_1_a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=False, activation="tanh", name=name+"_conv_tanh")(x_1)
-    x_1_b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=False, activation="sigmoid", name=name+"_conv_sigmoid")(x_1)
+    x_1_a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=False, activation="tanh", dilation_rate = dilation_rate, name=name+"_conv_tanh")(x_1)
+    x_1_b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=False, activation="sigmoid", dilation_rate = dilation_rate, name=name+"_conv_sigmoid")(x_1)
     
     x_1 = tf.keras.layers.Multiply(name=name+"_mult")([ x_1_a, x_1_b ])
     x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=False, name=name+"_conv_1x1")(x_1)
