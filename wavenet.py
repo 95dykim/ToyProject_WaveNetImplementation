@@ -16,8 +16,8 @@ import librosa
 import pickle
 import glob
 
-GLOBAL_INPUT_LENGTH = 4410
-USE_BIAS = True
+GLOBAL_INPUT_LENGTH = 2000
+USE_BIAS = False
 
 """
 spoken_digit (https://www.tensorflow.org/datasets/catalog/spoken_digit)
@@ -25,8 +25,8 @@ A free audio dataset of spoken digits. Think MNIST for audio.
 A simple audio/speech dataset consisting of recordings of spoken digits in wav files at 8kHz. The recordings are trimmed so that they have near minimal silence at the beginnings and ends.
 """
 def load_dataset():
-    if os.path.exists("dataset/gtzan/dataset_xyf.pickle"):
-        with open("dataset/gtzan/dataset_xyf.pickle", "rb") as f:
+    if os.path.exists("dataset/gtzan/dataset_8000hz_xyf.pickle"):
+        with open("dataset/gtzan/dataset_8000hz_xyf.pickle", "rb") as f:
             list_aud, list_label, list_fname = pickle.load(f)
             
         return list_aud, list_label, list_fname
@@ -43,13 +43,13 @@ def load_dataset():
                     fname = fpath.split("/")[-1]
                     aud = librosa.load(fpath, sr=22050)[0]
                     
-                    list_aud.append(aud)
+                    list_aud.append( librosa.resample(aud, orig_sr=22050, target_sr=8000) )
                     list_label.append(label)
                     list_fname.append(fname)
                 except:
                     print("FAIL - {}".format(fname))
                 
-        with open("dataset/gtzan/dataset_xyf.pickle", "wb") as f:
+        with open("dataset/gtzan/dataset_8000hz_xyf.pickle", "wb") as f:
             pickle.dump([list_aud, list_label, list_fname], f)
         
         return list_aud, list_label, list_fname
