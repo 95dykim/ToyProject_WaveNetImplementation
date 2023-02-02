@@ -88,9 +88,9 @@ def WaveNet(input_length = None, channel_size = 32, num_layers = 32, dilation_li
     #Output layers
     x = tf.keras.layers.Add(name = "SkipConnections")(list_skip)
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_1")(x)
-    x = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name="SkipConnections_conv_1")(x)
+    x = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=True, name="SkipConnections_conv_1")(x)
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_2")(x)
-    x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=USE_BIAS, name="SkipConnections_conv_2")(x)
+    x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=True, name="SkipConnections_conv_2")(x)
 
     #x = tf.keras.layers.GlobalAveragePooling1D(name="gap")(x)
     
