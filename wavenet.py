@@ -25,32 +25,32 @@ A free audio dataset of spoken digits. Think MNIST for audio.
 A simple audio/speech dataset consisting of recordings of spoken digits in wav files at 8kHz. The recordings are trimmed so that they have near minimal silence at the beginnings and ends.
 """
 def load_dataset():
-    if os.path.exists("dataset/spoken_digit/dataset_xyf.pickle"):
-        with open("dataset/spoken_digit/dataset_xyf.pickle", "rb") as f:
+    if os.path.exists("dataset/gtzan/dataset_xyf.pickle"):
+        with open("dataset/gtzan/dataset_xyf.pickle", "rb") as f:
             list_aud, list_label, list_fname = pickle.load(f)
             
         return list_aud, list_label, list_fname
     else:
-        tfds.load('spoken_digit')
-        shutil.move("cache/downloads/extracted/TAR_GZ.Jako_free-spok-digi-data_arch_v1.0.9i8RM3hKdUFy7trNlwJ-AxmPyqndXivxjTmFBovhxAMA.tar.gz/free-spoken-digit-dataset-1.0.9/recordings", "dataset/spoken_digit/audio/")
-        
-        list_fname = []
         list_aud = []
         list_label = []
-
-        for fpath in glob.glob("dataset/spoken_digit/audio/*.wav"):
-            fname = fpath.split("/")[-1]
-            aud = librosa.load(fpath, sr=8000)[0]
-            label = int(fname.split("_")[0])
-
-            list_fname.append(fname)
-            list_aud.append(aud)
-            list_label.append(label)
+        list_fname = []
+        
+        for fpath_genre in glob.glob("dataset/gtzan/genres_original/*"):
+            label = fpath_genre.split("/")[-1]
             
+            for fpath in glob.glob(fpath_genre + "/*.wav") :
+                try:
+                    fname = fpath.split("/")[-1]
+                    aud = librosa.load(fpath, sr=22050)[0]
+                except:
+                    print("FAIL - {}".format(fname))
+                
+                list_aud.append(aud)
+                list_label.append(label)
+                list_fname.append(fname)
+                
         with open("dataset/spoken_digit/dataset_xyf.pickle", "wb") as f:
             pickle.dump([list_aud, list_label, list_fname], f)
-        
-        shutil.rmtree("cache")
         
         return list_aud, list_label, list_fname
             
