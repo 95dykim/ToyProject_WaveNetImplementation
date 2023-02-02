@@ -117,7 +117,7 @@ def dequantize_aud(x, max_n = 256):
 ########################################################################################################
 
 # A function to quantize a list of audios to dataset_x, dataset_y
-def convert_to_dataset( list_aud, input_length = GLOBAL_INPUT_LENGTH, win_stride=2000 ):
+def convert_to_dataset( list_aud, input_length = GLOBAL_INPUT_LENGTH, win_stride=GLOBAL_INPUT_LENGTH ):
     dataset_x = []
     dataset_y = []
     
