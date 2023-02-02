@@ -16,7 +16,7 @@ import librosa
 import pickle
 import glob
 
-GLOBAL_INPUT_LENGTH = 2000
+GLOBAL_INPUT_LENGTH = 4410
 USE_BIAS = True
 
 """
