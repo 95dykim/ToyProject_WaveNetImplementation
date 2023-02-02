@@ -42,14 +42,14 @@ def load_dataset():
                 try:
                     fname = fpath.split("/")[-1]
                     aud = librosa.load(fpath, sr=22050)[0]
+                    
+                    list_aud.append(aud)
+                    list_label.append(label)
+                    list_fname.append(fname)
                 except:
                     print("FAIL - {}".format(fname))
                 
-                list_aud.append(aud)
-                list_label.append(label)
-                list_fname.append(fname)
-                
-        with open("dataset/spoken_digit/dataset_xyf.pickle", "wb") as f:
+        with open("dataset/gtzan/dataset_xyf.pickle", "wb") as f:
             pickle.dump([list_aud, list_label, list_fname], f)
         
         return list_aud, list_label, list_fname
