@@ -13,9 +13,15 @@ https://arxiv.org/abs/1609.03499
 # Requirements
 
 tensorflow
+
 tensorflow-datasets
+
 librosa
+
 pydub
+
 numpy
+
 pandas
+
 gtzan dataset (https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification)
