@@ -67,24 +67,25 @@ def load_dataset(split="train", hz=16000):
 #TODO - CHECK IF OFFICIAL PARAMETER VALUES EXIST
 ################################################
 def WaveNetBlock_NonConditional(x, channel_size, skip_channel, name, kernel_size = 2, dilation_rate = 1):
-    x_1a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_conv_tanh")(x)
-    x_1a = tf.keras.layers.Activation("tanh", name = name+"_activation_tanh")(x)
-    x_1b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_conv_sigmoid")(x)
-    x_1b = tf.keras.layers.Activation("sigmoid", name = name+"_activation_sigmoid")(x)
+    x_1a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_A_conv")(x)
+    x_1a = tf.keras.layers.Activation("tanh", name = name+"_A_tanh")(x)
+    x_1b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_B_conv")(x)
+    x_1b = tf.keras.layers.Activation("sigmoid", name = name+"+B_sigmoid")(x)
     
     x_1 = tf.keras.layers.Multiply(name=name+"_mult")([x_1a, x_1b])
-    x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_1x1")(x_1)
+    x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_out")(x_1)
     
-    x_1_skip = tf.keras.layers.Conv1D(skip_channel, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_skip")(x_1)
-
-    return tf.keras.layers.Add(name=name+"_residual")([x_1, x]), x_1_skip
+    x_1_skip = tf.keras.layers.Conv1D(skip_channel, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_skip")(x_1)    
+    x = tf.keras.layers.Add(name=name+"_residual")([x_1, x])
+    
+    return x, x_1_skip
 
 def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel =64, max_n=QUANT_B, out_size = OUT_SIZE, include_softmax=True):
     inputs = tf.keras.Input(shape=(input_length, 1), name="inputs")
     x = inputs
     
     #Initial Conv
-    x = tf.keras.layers.Conv1D(channel_size, 2, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = 2, name="conv_initial")(x)
+    x = tf.keras.layers.Conv1D(channel_size, 2, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = 2, name="initial_conv")(x)
     
     #WaveNet ResidualBlocks
     list_skip = []
@@ -98,10 +99,10 @@ def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dil
     x = tf.keras.layers.Add(name = "SkipConnections")(list_skip)
 
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_1")(x)
-    x = tf.keras.layers.Conv1D(skip_channel, 1, strides=1, padding="same", use_bias=True, name="SkipConnections_conv_1")(x)
+    x = tf.keras.layers.Conv1D(skip_channel, 1, strides=1, padding="same", use_bias=True, name="out_conv_1")(x)
 
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_2")(x)
-    x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=True, name="SkipConnections_conv_2")(x)
+    x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=True, name="out_conv_2")(x)
 
     if include_softmax:
         outputs = tf.keras.layers.Softmax(name= "outputs")(x[:,-out_size:])
