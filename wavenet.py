@@ -181,15 +181,13 @@ def remove_short( list_aud ):
 list_aud_train = remove_short(list_aud_train)
 list_aud_valid = remove_short(list_aud_valid)
 
-train_ds = DataSet(list_aud_train).repeat(10).shuffle(512).batch(128*4)
+train_ds = DataSet(list_aud_train).repeat(10).shuffle(512).batch(128)
 valid_ds = DataSet(list_aud_valid).batch(128)
 
-strategy = tf.distribute.MirroredStrategy()
-with strategy.scope():
-    model = WaveNet()
-    loss = tf.keras.losses.CategoricalCrossentropy()
-    optim = tf.keras.optimizers.Adam()
-    model.compile(loss=loss, optimizer=optim)
+model = WaveNet()
+loss = tf.keras.losses.CategoricalCrossentropy()
+optim = tf.keras.optimizers.Adam()
+model.compile(loss=loss, optimizer=optim)
 
 model.summary()
 
