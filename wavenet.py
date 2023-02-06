@@ -77,7 +77,7 @@ def WaveNetBlock_NonConditional(x, channel_size, skip_channel, name, kernel_size
 
     return tf.keras.layers.Add(name=name+"_residual")([x_1, x]), x_1_skip
 
-def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel =64, max_n=QUANT_B, out_size = OUT_SIZE):
+def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel =64, max_n=QUANT_B, out_size = OUT_SIZE, include_softmax=True):
     inputs = tf.keras.Input(shape=(input_length, 1), name="inputs")
     x = inputs
     
@@ -101,8 +101,10 @@ def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dil
     x = tf.keras.layers.ReLU(name= "SkipConnections_ReLU_2")(x)
     x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=True, name="SkipConnections_conv_2")(x)
 
-    #outputs = x[:,-out_size:]
-    outputs = tf.keras.layers.Softmax(name= "outputs")(x[:,-out_size:])
+    if include_softmax:
+        outputs = tf.keras.layers.Softmax(name= "outputs")(x[:,-out_size:])
+    else:
+        outputs = x[:,-out_size:]
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
 
