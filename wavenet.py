@@ -26,40 +26,45 @@ QUANT_B = 128
 OUT_SIZE = 16
 GLOBAL_INPUT_LENGTH = 2**DILATION_LIMIT * NUM_BLOCKS + OUT_SIZE + 1 #add 1 due to initial conv
 
-"""
-spoken_digit (https://www.tensorflow.org/datasets/catalog/spoken_digit)
-A free audio dataset of spoken digits. Think MNIST for audio.
-A simple audio/speech dataset consisting of recordings of spoken digits in wav files at 8kHz. The recordings are trimmed so that they have near minimal silence at the beginnings and ends.
-"""
-def load_dataset():
-    if os.path.exists("dataset/gtzan/dataset_8000hz_xyf.pickle"):
-        with open("dataset/gtzan/dataset_8000hz_xyf.pickle", "rb") as f:
-            list_aud, list_label, list_fname = pickle.load(f)
-            
-        return list_aud, list_label, list_fname
+def load_dataset(split="train", hz=16000):
+    if split.lower() not in ["train", "validation", "test"]:
+        print("INVALID SPLIT")
+        return
+    
+    os.makedirs("dataset/groove/", exist_ok=True)
+    
+    #list_style = ["afrobeat", "afrocuban", "blues", "country", "dance", "funk", "gospel", "highlife", "hiphop", "jazz", "latin", "middleeastern", "neworleans", "pop", "punk", "reggae", "rock", "soul"]
+    
+    # Original Dataset
+    if os.path.exists("dataset/groove/dataset_" + split + "_16000hz_xy.pickle"):
+        with open("dataset/groove/dataset_" + split + "_16000hz_xy.pickle", "rb") as f:
+            list_aud, list_label = pickle.load(f)
     else:
+        ds_tf = tfds.load('groove/full-16000hz', split=split)
+        
         list_aud = []
         list_label = []
-        list_fname = []
         
-        for fpath_genre in glob.glob("dataset/gtzan/genres_original/*"):
-            label = fpath_genre.split("/")[-1]
-            
-            for fpath in glob.glob(fpath_genre + "/*.wav") :
-                try:
-                    fname = fpath.split("/")[-1]
-                    aud = librosa.load(fpath, sr=22050)[0]
-                    
-                    list_aud.append( librosa.resample(aud, orig_sr=22050, target_sr=8000) )
-                    list_label.append(label)
-                    list_fname.append(fname)
-                except:
-                    print("FAIL - {}".format(fname))
+        for elem in ds_tf:
+            list_aud.append( elem['audio'].numpy() )
+            list_label.append( elem['style']['primary'].numpy() )
                 
-        with open("dataset/gtzan/dataset_8000hz_xyf.pickle", "wb") as f:
-            pickle.dump([list_aud, list_label, list_fname], f)
+        with open("dataset/groove/dataset_" + split + "_16000hz_xy.pickle", "wb") as f:
+            pickle.dump([list_aud, list_label], f)
         
-        return list_aud, list_label, list_fname
+    # check if resampling is required
+    if hz == 16000:
+        return list_aud, list_label
+    else:
+        if os.path.exists("dataset/groove/dataset_" + split + "_" + str(hz) + "hz_xy.pickle"):
+            with open("dataset/groove/dataset_" + split + "_" + str(hz) + "hz_xy.pickle", "rb") as f:
+                list_aud, list_label = pickle.load(f)
+            return list_aud, list_label
+        else:
+            list_aud = [ librosa.resample(aud, orig_sr=16000, target_sr=hz) for aud in list_aud ]
+            with open("dataset/groove/dataset_" + split + "_" + str(hz) + "hz_xy.pickle", "wb") as f:
+                pickle.dump([list_aud, list_label], f)
+            return list_aud, list_label
             
 ################################################
 #TODO - CHECK IF OFFICIAL PARAMETER VALUES EXIST
