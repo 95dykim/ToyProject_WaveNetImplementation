@@ -11,3 +11,11 @@ https://arxiv.org/abs/1609.03499
 ❎ Training of Conditional WaveNet
 
 # Requirements
+
+tensorflow
+tensorflow-datasets
+librosa
+pydub
+numpy
+pandas
+gtzan dataset (https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification)
