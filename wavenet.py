@@ -41,7 +41,7 @@ def load_dataset_gtzan(hz=22050):
             label = fpath_parent.split("/")[-1]
             for fpath in glob.glob(fpath_parent + "/*.wav"):
                 try:
-                    aud = librosa.load(fpath, sr=44100)[0]
+                    aud = librosa.load(fpath, sr=22050)[0]
                     
                     list_aud.append(aud)
                     list_label.append(label)
