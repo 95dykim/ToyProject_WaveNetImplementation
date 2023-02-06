@@ -16,8 +16,14 @@ import librosa
 import pickle
 import glob
 
-GLOBAL_INPUT_LENGTH = 2000
-USE_BIAS = False
+USE_BIAS = True
+NUM_BLOCKS = 4
+DILATION_LIMIT = 10
+
+QUANT_B = 128
+
+OUT_SIZE = 16
+GLOBAL_INPUT_LENGTH = 2**DILATION_LIMIT * NUM_BLOCKS + OUT_SIZE + 1 #add 1 due to initial conv
 
 """
 spoken_digit (https://www.tensorflow.org/datasets/catalog/spoken_digit)
