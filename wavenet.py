@@ -80,8 +80,33 @@ def WaveNetBlock_NonConditional(x, channel_size, skip_channel, name, kernel_size
     
     return x, x_1_skip
 
-def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel =64, max_n=QUANT_B, out_size = OUT_SIZE, include_softmax=True):
+def WaveNetBlock_GlobalConditional(x, gc, input_length, channel_size, skip_channel, name, kernel_size = 2, dilation_rate = 1):
+    x_1a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_A_conv")(x)
+    x_1a_gc = tf.keras.layers.Dense(input_length, name=name+"_A_gc")(gc)
+    x_1a_gc = tf.keras.layers.Reshape((-1,1), name = name+"_A_gc_reshape")(x_1a_gc)
+    x_1a = tf.keras.layers.Add(name = name+"_A_add")([x_1a, x_1a_gc])
+    x_1a = tf.keras.layers.Activation("tanh", name = name+"_A_tanh")(x_1a)
+    
+    x_1b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_B_conv")(x)
+    x_1b_gc = tf.keras.layers.Dense(input_length, name=name+"_B_gc")(gc)
+    x_1b_gc = tf.keras.layers.Reshape((-1,1), name = name+"_B_gc_reshape")(x_1b_gc)
+    x_1b = tf.keras.layers.Add(name = name+"_B_add")([x_1b, x_1b_gc])
+    x_1b = tf.keras.layers.Activation("sigmoid", name = name+"_B_sigmoid")(x_1b)
+    
+    x_1 = tf.keras.layers.Multiply(name=name+"_mult")([x_1a, x_1b])
+    x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_out")(x_1)
+    
+    x_1_skip = tf.keras.layers.Conv1D(skip_channel, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_skip")(x_1)    
+    x = tf.keras.layers.Add(name=name+"_residual")([x_1, x])
+    
+    return x, x_1_skip
+
+def WaveNet(input_length = GLOBAL_INPUT_LENGTH, channel_size = 32, num_blocks = NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel =64, max_n=QUANT_B, out_size = OUT_SIZE, include_softmax=True, global_condition = 0):
     inputs = tf.keras.Input(shape=(input_length, 1), name="inputs")
+    
+    if global_condition:
+        gc = tf.keras.Input(shape=(global_condition,), name="input_gc")
+
     x = inputs
     
     #Initial Conv
@@ -91,7 +116,13 @@ def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dil
     list_skip = []
     for idx_i in range(num_blocks):
         for idx_j in range(dilation_limit):
-            x, x_skip = WaveNetBlock_NonConditional(x, channel_size, skip_channel, "WaveNetBlock_{}_{}".format(idx_i, idx_j), dilation_rate = 2**(idx_j))
+            #x, x_skip = WaveNetBlock_NonConditional(x, channel_size, skip_channel, "WaveNetBlock_{}_{}".format(idx_i, idx_j), dilation_rate = 2**(idx_j))
+            #"""
+            if global_condition:
+                x, x_skip = WaveNetBlock_GlobalConditional(x, gc, input_length, channel_size, skip_channel, "WaveNetBlock_{}_{}".format(idx_i, idx_j), dilation_rate = 2**(idx_j))
+            else:
+                x, x_skip = WaveNetBlock_NonConditional(x, channel_size, skip_channel, "WaveNetBlock_{}_{}".format(idx_i, idx_j), dilation_rate = 2**(idx_j))
+            #"""
 
             list_skip.append(x_skip)
     
@@ -109,7 +140,7 @@ def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dil
     else:
         outputs = x[:,-out_size:]
 
-    return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
+    return tf.keras.Model(inputs=[inputs, gc], outputs=outputs, name='WaveNet')
 
 ########################################################################################################
 
