@@ -1,5 +1,4 @@
 import os
-#os.environ["TF_GPU_ALLOCATOR"]="cuda_malloc_async"
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -32,8 +31,6 @@ def load_dataset(split="train", hz=16000):
         return
     
     os.makedirs("dataset/groove/", exist_ok=True)
-    
-    #list_style = ["afrobeat", "afrocuban", "blues", "country", "dance", "funk", "gospel", "highlife", "hiphop", "jazz", "latin", "middleeastern", "neworleans", "pop", "punk", "reggae", "rock", "soul"]
     
     # Original Dataset
     if os.path.exists("dataset/groove/dataset_" + split + "_16000hz_xy.pickle"):
@@ -105,7 +102,6 @@ def WaveNet(input_length = None, channel_size = 32, num_blocks = NUM_BLOCKS, dil
     x = tf.keras.layers.Conv1D(max_n, 1, strides=1, padding="same", use_bias=True, name="SkipConnections_conv_2")(x)
 
     #outputs = x[:,-out_size:]
-    
     outputs = tf.keras.layers.Softmax(name= "outputs")(x[:,-out_size:])
 
     return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
