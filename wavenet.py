@@ -68,9 +68,9 @@ def load_dataset(split="train", hz=16000):
 ################################################
 def WaveNetBlock_NonConditional(x, channel_size, skip_channel, name, kernel_size = 2, dilation_rate = 1):
     x_1a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_A_conv")(x)
-    x_1a = tf.keras.layers.Activation("tanh", name = name+"_A_tanh")(x)
+    x_1a = tf.keras.layers.Activation("tanh", name = name+"_A_tanh")(x_1a)
     x_1b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_B_conv")(x)
-    x_1b = tf.keras.layers.Activation("sigmoid", name = name+"_B_sigmoid")(x)
+    x_1b = tf.keras.layers.Activation("sigmoid", name = name+"_B_sigmoid")(x_1b)
     
     x_1 = tf.keras.layers.Multiply(name=name+"_mult")([x_1a, x_1b])
     x_1 = tf.keras.layers.Conv1D(channel_size, 1, strides=1, padding="same", use_bias=USE_BIAS, name=name+"_conv_out")(x_1)
