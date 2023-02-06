@@ -48,20 +48,20 @@ def load_dataset_gtzan(hz=22050):
                 except:
                     pass
                 
-        with open("dataset/groove/dataset_22050hz_xy.pickle", "wb") as f:
+        with open("dataset/gtzan/dataset_22050hz_xy.pickle", "wb") as f:
             pickle.dump([list_aud, list_label], f)
         
     # check if resampling is required
     if hz == 22050:
         return list_aud, list_label
     else:
-        if os.path.exists("dataset/groove/dataset_" + str(hz) + "hz_xy.pickle"):
-            with open("dataset/groove/dataset_" + str(hz) + "hz_xy.pickle", "rb") as f:
+        if os.path.exists("dataset/gtzan/dataset_" + str(hz) + "hz_xy.pickle"):
+            with open("dataset/gtzan/dataset_" + str(hz) + "hz_xy.pickle", "rb") as f:
                 list_aud, list_label = pickle.load(f)
             return list_aud, list_label
         else:
-            list_aud = [ librosa.resample(aud, orig_sr=16000, target_sr=hz) for aud in list_aud ]
-            with open("dataset/groove/dataset_" + split + "_" + str(hz) + "hz_xy.pickle", "wb") as f:
+            list_aud = [ librosa.resample(aud, orig_sr=22050, target_sr=hz) for aud in list_aud ]
+            with open("dataset/gtzan/dataset_" + split + "_" + str(hz) + "hz_xy.pickle", "wb") as f:
                 pickle.dump([list_aud, list_label], f)
             return list_aud, list_label
 
