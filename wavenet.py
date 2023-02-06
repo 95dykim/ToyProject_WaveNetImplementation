@@ -19,14 +19,18 @@ import glob
 NORMALIZE_AUD = True
 USE_BIAS = True
 NUM_BLOCKS = 4
-DILATION_LIMIT = 10
+DILATION_LIMIT = 9
 
-QUANT_B = 128
+QUANT_B = 64
 
 OUT_SIZE = 16
 GLOBAL_INPUT_LENGTH = 2**DILATION_LIMIT * NUM_BLOCKS + OUT_SIZE + 1 #add 1 due to initial conv
 
-SAVENAME = "WaveNet_groove_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
+SAVENAME = "WaveNet_gtzan_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
+
+GTZAN_DICT_LABEL2NUM = dict()
+for idx, fpath in enumerate(sorted(glob.glob("dataset/gtzan/*"))):
+    GTZAN_DICT_LABEL2NUM[ fpath.split("/")[-1] ] = idx
 
 def load_dataset_gtzan(hz=22050):
     # Original Dataset
@@ -38,7 +42,7 @@ def load_dataset_gtzan(hz=22050):
         list_label = []
         
         for fpath_parent in glob.glob("dataset/gtzan/*"):
-            label = fpath_parent.split("/")[-1]
+            label = GTZAN_DICT_LABEL2NUM[fpath_parent.split("/")[-1]]
             for fpath in glob.glob(fpath_parent + "/*.wav"):
                 try:
                     aud = librosa.load(fpath, sr=22050)[0]
@@ -180,7 +184,10 @@ def WaveNet(input_length = GLOBAL_INPUT_LENGTH, channel_size = 32, num_blocks = 
     else:
         outputs = x[:,-out_size:]
 
-    return tf.keras.Model(inputs=[inputs, gc], outputs=outputs, name='WaveNet')
+    if global_condition:
+        return tf.keras.Model(inputs=[inputs, gc], outputs=outputs, name='WaveNet')
+    else:
+        return tf.keras.Model(inputs=inputs, outputs=outputs, name='WaveNet')
 
 ########################################################################################################
 
@@ -201,11 +208,18 @@ def dequantize_aud(x, max_n = QUANT_B):
 ########################################################################################################
 
 class DataSeq(tf.keras.utils.Sequence):
-    def __init__(self, list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
+    def __init__(self, list_aud, list_gc = None, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
         self.x = [ ]
+        
+        if type(list_gc) != type(None):
+            max_gc = max(list_gc)+1
+            self.gc = [ tf.one_hot(gc, max_gc, dtype=tf.float32) for gc in list_gc ]
+        else:
+            self.gc = None
+        
         for aud in list_aud:
             aud_q = quantize_aud(aud).astype(int)
-            
+
             if len(aud_q) >= (input_length + out_size):
                 self.x.append(aud_q)
             else:
@@ -225,13 +239,27 @@ class DataSeq(tf.keras.utils.Sequence):
         return_x = dequantize_aud( self.x[idx][window_start:window_start+self.input_length] )
         return_y = self.x[idx][window_start+self.input_length:window_start+self.input_length+self.out_size]
         
-        return return_x, tf.one_hot(return_y, QUANT_B)
+        if type(self.gc) != type(None):
+            return (return_x, self.gc[idx]), tf.one_hot(return_y, QUANT_B, dtype=tf.int32)
+        else:
+            return return_x, tf.one_hot(return_y, QUANT_B, dtype=tf.int32)
         
-def DataSet(list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
-    dataseq = DataSeq(list_aud, input_length)
+def DataSet_Unconditional(list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
+    dataseq = DataSeq(list_aud, input_length = input_length)
     ds = tf.data.Dataset.from_generator( lambda: (x for x in dataseq),
         output_signature=(
             tf.TensorSpec(shape=(input_length, ), dtype=tf.float32),
+            tf.TensorSpec(shape=(out_size, QUANT_B), dtype=tf.int32),
+        )
+    )
+    ds = ds
+    return ds
+
+def DataSet_GlobalConditional(list_aud, list_gc, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
+    dataseq = DataSeq(list_aud, list_gc, input_length = input_length)
+    ds = tf.data.Dataset.from_generator( lambda: (x for x in dataseq),
+        output_signature=(
+            ( tf.TensorSpec(shape=(input_length, ), dtype=tf.float32), tf.TensorSpec(shape=(max(list_gc)+1, ), dtype=tf.float32) ),
             tf.TensorSpec(shape=(out_size, QUANT_B), dtype=tf.int32),
         )
     )
