@@ -10,6 +10,7 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 import numpy as np
+import pandas as pd
 
 import shutil
 import librosa
