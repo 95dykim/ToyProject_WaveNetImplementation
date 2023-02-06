@@ -165,3 +165,37 @@ def DataSet(list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
     )
     ds = ds
     return ds
+
+list_aud_train, list_label_train = load_dataset(split="train", hz=16000)
+list_aud_valid, list_label_valid = load_dataset(split="validation", hz=16000)
+
+def remove_short( list_aud ):
+    list_return = []
+    for aud in list_aud:
+        if len(aud) < GLOBAL_INPUT_LENGTH + OUT_SIZE:
+            continue
+        list_return.append( aud )
+        
+    return list_return
+
+list_aud_train = remove_short(list_aud_train)
+list_aud_valid = remove_short(list_aud_valid)
+
+train_ds = DataSet(list_aud_train).repeat(10).shuffle(512).batch(128*4)
+valid_ds = DataSet(list_aud_valid).batch(128)
+
+strategy = tf.distribute.MirroredStrategy()
+with strategy.scope():
+    model = WaveNet()
+    loss = tf.keras.losses.CategoricalCrossentropy()
+    optim = tf.keras.optimizers.Adam()
+    model.compile(loss=loss, optimizer=optim)
+
+model.summary()
+
+checkpoint_filepath = './checkpoints/g0_checkpoint-{epoch}'
+model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint( filepath=checkpoint_filepath, save_weights_only=True, save_best_only=True)
+
+history = model.fit(train_ds, epochs=10000, validation_data=valid_ds, callbacks=[model_checkpoint_callback])#, LR_Scheduler] )
+
+pd.DataFrame( history.history ).to_csv("g0.csv", index=False)
