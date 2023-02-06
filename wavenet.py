@@ -101,14 +101,14 @@ def WaveNet(input_length = None, channel_size = 32, num_layers = 32, dilation_li
 ########################################################################################################
 
 #A function to quantize an audio to a list of labels
-def quantize_aud(x, max_n = 256):
+def quantize_aud(x, max_n = QUANT_B):
     quantized = np.sign( x ) * np.log( 1 + ( max_n - 1 ) * abs(x) ) / np.log( max_n )
     quantized = ( quantized + 1 ) / 2
     quantized = np.digitize( quantized, np.arange(max_n) / (max_n-1) ) - 1
     return quantized
 
 #A function to dequantize a list of predictions
-def dequantize_aud(x, max_n = 256):
+def dequantize_aud(x, max_n = QUANT_B):
     dequantized = x / (max_n - 1)
     dequantized = dequantized * 2 - 1
     dequantized = (np.exp( dequantized * np.log(max_n) / np.sign(dequantized) ) - 1) / (max_n - 1) * np.sign(dequantized)
@@ -116,77 +116,39 @@ def dequantize_aud(x, max_n = 256):
 
 ########################################################################################################
 
-# A function to quantize a list of audios to dataset_x, dataset_y
-def convert_to_dataset( list_aud, input_length = GLOBAL_INPUT_LENGTH, win_stride=int(GLOBAL_INPUT_LENGTH/2) ):
-    dataset_x = []
-    dataset_y = []
-    
-    for aud in list_aud:
-        for div in range( 1 + max(0, int( np.ceil( ( len(aud) - input_length + 1 ) / win_stride ) )) ):
-            aud_div = aud[ div*win_stride : div*win_stride + input_length + 1 ]
-            aud_pad = np.zeros(input_length+1)
-            aud_pad[:len(aud_div)] = aud_div
-
-            dataset_x.append( aud_pad[:-1] )
-            dataset_y.append( quantize_aud(aud_pad[-1:]) )
-
-    return np.stack(dataset_x), np.stack(dataset_y)
-
-########################################################################################################
-
-class DataSeq_Train(tf.keras.utils.Sequence):
-    def __init__(self, list_aud, input_length = GLOBAL_INPUT_LENGTH):
+class DataSeq(tf.keras.utils.Sequence):
+    def __init__(self, list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
         self.x = [ ]
         for aud in list_aud:
-            if len(aud) >= (input_length + 1):
-                self.x.append(aud)
+            aud_q = quantize_aud(aud).astype(int)
+            
+            if len(aud_q) >= (input_length + out_size):
+                self.x.append(aud_q)
             else:
-                aud_pad = np.zeros(input_length + 1)
-                aud_pad[:len(aud)] = aud
+                aud_pad = np.zeros(input_length + out_size)
+                aud_pad[:len(aud_q)] = aud_q
                 self.x.append(aud_pad)
         
-        self.y = [ quantize_aud(x[1:]) for x in self.x ]
-        self.x = [ x[:-1] for x in self.x ]
-        
         self.input_length = input_length
+        self.out_size = out_size
 
     def __len__(self):
         return len(self.x)
 
     def __getitem__(self, idx):
-        window_start = np.random.randint( max( len(self.x[idx]) - self.input_length, 0 ) + 1 )
-        #return self.x[idx][window_start:window_start+self.input_length], self.y[idx][window_start:window_start+self.input_length]
-        return self.x[idx][window_start:window_start+self.input_length], self.y[idx][window_start:window_start+self.input_length][-1:]
+        window_start = np.random.randint( max( len(self.x[idx]) - self.input_length - self.out_size, 0 ) + 1 )
+
+        return_x = dequantize_aud( self.x[idx][window_start:window_start+self.input_length] )
+        return_y = self.x[idx][window_start+self.input_length:window_start+self.input_length+self.out_size]
         
-def DataSet_Train(list_aud, input_length = GLOBAL_INPUT_LENGTH):
-    dataseq = DataSeq_Train(list_aud, input_length)
+        return return_x, tf.one_hot(return_y, QUANT_B)
+        
+def DataSet(list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
+    dataseq = DataSeq(list_aud, input_length)
     ds = tf.data.Dataset.from_generator( lambda: (x for x in dataseq),
         output_signature=(
             tf.TensorSpec(shape=(input_length, ), dtype=tf.float32),
-            tf.TensorSpec(shape=(1, ), dtype=tf.float32),
-        )
-    )
-    ds = ds
-    return ds
-
-########################################################################################################
-
-class DataSeq_Valid(tf.keras.utils.Sequence):
-    def __init__(self, list_aud, input_length = GLOBAL_INPUT_LENGTH):
-        self.x, self.y = convert_to_dataset(list_aud, input_length = input_length, win_stride = 500)
-
-    def __len__(self):
-        return len(self.x)
-
-    def __getitem__(self, idx):
-        return self.x[idx], self.y[idx]
-        
-def DataSet_Valid(list_aud, input_length = GLOBAL_INPUT_LENGTH):
-    dataseq = DataSeq_Valid(list_aud, input_length)
-    ds = tf.data.Dataset.from_generator( lambda: (x for x in dataseq),
-        output_signature=(
-            tf.TensorSpec(shape=(input_length, ), dtype=tf.float32),
-            tf.TensorSpec(shape=(1, ), dtype=tf.float32),
+            tf.TensorSpec(shape=(out_size, QUANT_B), dtype=tf.int32),
         )
     )
     ds = ds
