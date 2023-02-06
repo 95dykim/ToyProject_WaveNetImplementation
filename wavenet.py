@@ -16,6 +16,7 @@ import librosa
 import pickle
 import glob
 
+NORMALIZE_AUD = True
 USE_BIAS = True
 NUM_BLOCKS = 4
 DILATION_LIMIT = 10
@@ -206,7 +207,7 @@ def remove_short( list_aud ):
     for aud in list_aud:
         if len(aud) < GLOBAL_INPUT_LENGTH + OUT_SIZE:
             continue
-        list_return.append( aud )
+        list_return.append( (librosa.util.normalize(aud) if NORMALIZE_AUD else aud) )
         
     return list_return
 
