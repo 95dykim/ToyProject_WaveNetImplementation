@@ -26,6 +26,8 @@ QUANT_B = 128
 OUT_SIZE = 16
 GLOBAL_INPUT_LENGTH = 2**DILATION_LIMIT * NUM_BLOCKS + OUT_SIZE + 1 #add 1 due to initial conv
 
+SAVENAME = "WaveNet_groove_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
+
 def load_dataset_gtzan(hz=22050):
     # Original Dataset
     if os.path.exists("dataset/gtzan/dataset_22050hz_xy.pickle"):
@@ -261,9 +263,9 @@ model.compile(loss=loss, optimizer=optim)
 
 model.summary()
 
-checkpoint_filepath = './checkpoints/g0_checkpoint-{epoch}'
+checkpoint_filepath = "./checkpoints/"+SAVENAME+"_checkpoint-{epoch}"
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint( filepath=checkpoint_filepath, save_weights_only=True, save_best_only=True)
 
 history = model.fit(train_ds, epochs=10000, validation_data=valid_ds, callbacks=[model_checkpoint_callback])#, LR_Scheduler] )
 
-pd.DataFrame( history.history ).to_csv("g0.csv", index=False)
+pd.DataFrame( history.history ).to_csv(SAVENAME+".csv", index=False)
