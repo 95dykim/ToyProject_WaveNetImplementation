@@ -219,7 +219,7 @@ class DataSeq(tf.keras.utils.Sequence):
             self.gc = None
         
         for aud in list_aud:
-            aud_q = quantize_aud(aud).astype(int)
+            aud_q = quantize_aud( np.concatenate( (np.zeros(input_length), aud) ) ).astype(int)
 
             if len(aud_q) >= (input_length + out_size):
                 self.x.append(aud_q)
@@ -241,9 +241,9 @@ class DataSeq(tf.keras.utils.Sequence):
         return_y = self.x[idx][window_start+self.input_length:window_start+self.input_length+self.out_size]
         
         if type(self.gc) != type(None):
-            return (return_x, self.gc[idx]), tf.one_hot(return_y, QUANT_B, dtype=tf.int32)
+            return (return_x, self.gc[idx]), tf.one_hot(return_y, QUANT_B)
         else:
-            return return_x, tf.one_hot(return_y, QUANT_B, dtype=tf.int32)
+            return return_x, tf.one_hot(return_y, QUANT_B)
         
 def DataSet_Unconditional(list_aud, input_length = GLOBAL_INPUT_LENGTH, out_size = OUT_SIZE):
     dataseq = DataSeq(list_aud, input_length = input_length)
