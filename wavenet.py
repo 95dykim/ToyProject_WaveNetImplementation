@@ -16,15 +16,17 @@ import librosa
 import pickle
 import glob
 
-NORMALIZE_AUD = True
+NORMALIZE_AUD = False
 USE_BIAS = True
 NUM_BLOCKS = 4
-DILATION_LIMIT = 9
+DILATION_LIMIT = 10
 
 QUANT_B = 64
 
 OUT_SIZE = 16
 GLOBAL_INPUT_LENGTH = 2**DILATION_LIMIT * NUM_BLOCKS + OUT_SIZE + 1 #add 1 due to initial conv
+
+LABEL_DEPTH = 0
 
 SAVENAME = "WaveNet_rosenstock_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
 
@@ -146,7 +148,7 @@ def WaveNetBlock_GlobalConditional(x, gc, input_length, channel_size, skip_chann
     
     return x, x_1_skip
 
-def WaveNet(input_length = GLOBAL_INPUT_LENGTH, channel_size = 32, num_blocks = NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel =64, max_n=QUANT_B, out_size = OUT_SIZE, include_softmax=True, global_condition = 0):
+def WaveNet(input_length=GLOBAL_INPUT_LENGTH, channel_size=32, num_blocks=NUM_BLOCKS, dilation_limit=DILATION_LIMIT, skip_channel=16, max_n=QUANT_B, out_size=OUT_SIZE, include_softmax=True, global_condition=0):
     inputs = tf.keras.Input(shape=(input_length, 1), name="inputs")
     
     if global_condition:
