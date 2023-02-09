@@ -17,4 +17,14 @@ numpy
 
 pandas
 
-gtzan dataset (https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification)
+# Note
+
+I used the following albums for the training:
+-
+-
+-
+-
+
+
+You can download msuic by Jeff Rosenstock for free from [his record label website](http://www.quoteunquoterecords.com/)
+If you're planning to use the same dataset I used or if you liked the music, then consider supporting him by donating or buying the albums!
