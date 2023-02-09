@@ -18,7 +18,7 @@ numpy
 pandas
 
 # Dataset
-I have used the following albums for the training
+I have used the following albums as a training dataset:
 - Three Cheers for Disappointment by The Arrogant Sons of Bitches
 - Album Minus Band by Bomb the Music Industry!
 - Goodbye Cool World! by Bomb the Music Industry!
