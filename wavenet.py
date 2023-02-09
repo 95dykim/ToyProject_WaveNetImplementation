@@ -26,48 +26,7 @@ QUANT_B = 64
 OUT_SIZE = 16
 GLOBAL_INPUT_LENGTH = 2**DILATION_LIMIT * NUM_BLOCKS + OUT_SIZE + 1 #add 1 due to initial conv
 
-SAVENAME = "WaveNet_gtzan_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
-
-GTZAN_DICT_LABEL2NUM = dict()
-for idx, fpath in enumerate(sorted(glob.glob("dataset/gtzan/*"))):
-    GTZAN_DICT_LABEL2NUM[ fpath.split("/")[-1] ] = idx
-
-def load_dataset_gtzan(hz=22050):
-    # Original Dataset
-    if os.path.exists("dataset/gtzan/dataset_22050hz_xy.pickle"):
-        with open("dataset/gtzan/dataset_22050hz_xy.pickle", "rb") as f:
-            list_aud, list_label = pickle.load(f)
-    else:
-        list_aud = []
-        list_label = []
-        
-        for fpath_parent in glob.glob("dataset/gtzan/*"):
-            label = GTZAN_DICT_LABEL2NUM[fpath_parent.split("/")[-1]]
-            for fpath in glob.glob(fpath_parent + "/*.wav"):
-                try:
-                    aud = librosa.load(fpath, sr=22050)[0]
-                    
-                    list_aud.append(aud)
-                    list_label.append(label)
-                except:
-                    pass
-                
-        with open("dataset/gtzan/dataset_22050hz_xy.pickle", "wb") as f:
-            pickle.dump([list_aud, list_label], f)
-        
-    # check if resampling is required
-    if hz == 22050:
-        return list_aud, list_label
-    else:
-        if os.path.exists("dataset/gtzan/dataset_" + str(hz) + "hz_xy.pickle"):
-            with open("dataset/gtzan/dataset_" + str(hz) + "hz_xy.pickle", "rb") as f:
-                list_aud, list_label = pickle.load(f)
-            return list_aud, list_label
-        else:
-            list_aud = [ librosa.resample(aud, orig_sr=22050, target_sr=hz) for aud in list_aud ]
-            with open("dataset/gtzan/dataset_" + str(hz) + "hz_xy.pickle", "wb") as f:
-                pickle.dump([list_aud, list_label], f)
-            return list_aud, list_label
+SAVENAME = "WaveNet_rosenstock_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
 
 def load_dataset_groove(split="train", hz=16000):
     if split.lower() not in ["train", "validation", "test"]:
