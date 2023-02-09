@@ -267,34 +267,42 @@ def DataSet_GlobalConditional(list_aud, list_gc, input_length = GLOBAL_INPUT_LEN
     ds = ds
     return ds
 
-list_aud_train, list_label_train = load_dataset_groove(split="train", hz=16000)
-list_aud_valid, list_label_valid = load_dataset_groove(split="validation", hz=16000)
+list_aud_train, list_label_train = load_dataset_rosenstock(hz=10000)
 
-def remove_short( list_aud ):
-    list_return = []
-    for aud in list_aud:
+def remove_short( list_aud, list_label ):
+    list_return_aud = []
+    list_return_label = []
+    for aud, label in zip(list_aud, list_label):
         if len(aud) < GLOBAL_INPUT_LENGTH + OUT_SIZE:
             continue
-        list_return.append( (librosa.util.normalize(aud) if NORMALIZE_AUD else aud) )
+        list_return_aud.append( (librosa.util.normalize(aud) if NORMALIZE_AUD else aud) )
+        list_return_label.append( label )
         
-    return list_return
+    return list_return_aud, list_return_label
+list_aud_train, list_label_train = remove_short(list_aud_train, list_label_train)
 
-list_aud_train = remove_short(list_aud_train)
-list_aud_valid = remove_short(list_aud_valid)
+list_aud_train = np.asarray(list_aud_train, dtype=object)
+list_label_train = np.asarray(list_label_train, dtype=object)
 
-train_ds = DataSet(list_aud_train).repeat(10).shuffle(512).batch(128)
-valid_ds = DataSet(list_aud_valid).batch(128)
+list_idx = np.arange(len(list_aud_train))
+np.random.shuffle(list_idx)
 
-model = WaveNet()
+train_ds = DataSet_Unconditional(list_aud_train[list_idx[1:]]).repeat(4).shuffle(1024).batch( len(list_idx)-1 )
+valid_ds = DataSet_Unconditional(list_aud_train[list_idx[:1]]).batch(1)
+        
+########################################################################################################
+
+model = WaveNet(global_condition=LABEL_DEPTH)
 loss = tf.keras.losses.CategoricalCrossentropy()
 optim = tf.keras.optimizers.Adam()
 model.compile(loss=loss, optimizer=optim)
 
-model.summary()
+class CustomSaver(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        if (epoch+1)%100 == 0:
+            self.model.save("./checkpoints/"+SAVENAME+"_checkpoint-{}.h5".format(epoch))
+customsaver = CustomSaver()
 
-checkpoint_filepath = "./checkpoints/"+SAVENAME+"_checkpoint-{epoch}"
-model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint( filepath=checkpoint_filepath, save_weights_only=True, save_best_only=True)
-
-history = model.fit(train_ds, epochs=10000, validation_data=valid_ds, callbacks=[model_checkpoint_callback])#, LR_Scheduler] )
+history = model.fit(train_ds, epochs=50000, validation_data=valid_ds, callbacks=[customsaver])#, LR_Scheduler] )
 
 pd.DataFrame( history.history ).to_csv(SAVENAME+".csv", index=False)
