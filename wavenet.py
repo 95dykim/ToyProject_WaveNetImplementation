@@ -126,13 +126,13 @@ def WaveNetBlock_NonConditional(x, channel_size, skip_channel, name, kernel_size
 
 def WaveNetBlock_GlobalConditional(x, gc, input_length, channel_size, skip_channel, name, kernel_size = 2, dilation_rate = 1):
     x_1a = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_A_conv")(x)
-    x_1a_gc = tf.keras.layers.Dense(input_length, name=name+"_A_gc")(gc)
+    x_1a_gc = tf.keras.layers.Dense(input_length, use_bias=False, name=name+"_A_gc")(gc)
     x_1a_gc = tf.keras.layers.Reshape((-1,1), name = name+"_A_gc_reshape")(x_1a_gc)
     x_1a = tf.keras.layers.Add(name = name+"_A_add")([x_1a, x_1a_gc])
     x_1a = tf.keras.layers.Activation("tanh", name = name+"_A_tanh")(x_1a)
     
     x_1b = tf.keras.layers.Conv1D(channel_size, kernel_size, strides=1, padding="causal", use_bias=USE_BIAS, dilation_rate = dilation_rate, name=name+"_B_conv")(x)
-    x_1b_gc = tf.keras.layers.Dense(input_length, name=name+"_B_gc")(gc)
+    x_1b_gc = tf.keras.layers.Dense(input_length, use_bias=False, name=name+"_B_gc")(gc)
     x_1b_gc = tf.keras.layers.Reshape((-1,1), name = name+"_B_gc_reshape")(x_1b_gc)
     x_1b = tf.keras.layers.Add(name = name+"_B_add")([x_1b, x_1b_gc])
     x_1b = tf.keras.layers.Activation("sigmoid", name = name+"_B_sigmoid")(x_1b)
