@@ -5,17 +5,19 @@ An unofficial tensorflow/keras implementation of [WaveNet: A Generative Model Fo
 
 
 # Requirements
+python
+
 tensorflow
 
-tensorflow-datasets
-
 librosa
-
-pydub
 
 numpy
 
 pandas
+
+tensorflow-datasets
+
+pydub
 
 # Dataset
 I have used the following albums as a training dataset:
