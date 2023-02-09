@@ -19,18 +19,18 @@ pandas
 
 # Dataset
 I have used the following albums as a training dataset:
-- Three Cheers for Disappointment by The Arrogant Sons of Bitches
-- Album Minus Band by Bomb the Music Industry!
-- Goodbye Cool World! by Bomb the Music Industry!
-- Get Warmer by Bomb the Music Industry!
-- Scrambles by Bomb the Music Industry!
-- Vacation by Bomb the Music Industry!
-- I Look Like Shit by Jeff Rosenstock
-- We Cool? by Jeff Rosenstock
-- WORRY. by Jeff Rosenstock
-- POST- by Jeff Rosenstock
-- NO DREAM by Jeff Rosenstock
-- SKA DREAM by Jeff Rosenstock
+- The Arrogant Sons of Bitches - Three Cheers for Disappointment
+- Bomb the Music Industry! - Album Minus Band
+- Bomb the Music Industry! - Goodbye Cool World!
+- Bomb the Music Industry! - Get Warmer
+- Bomb the Music Industry! - Scrambles
+- Bomb the Music Industry! - Vacation
+- Jeff Rosenstock - I Look Like Shit
+- Jeff Rosenstock - We Cool?
+- Jeff Rosenstock - WORRY.
+- Jeff Rosenstock - POST-
+- Jeff Rosenstock - NO DREAM
+- Jeff Rosenstock - SKA DREAM
 
 You can download all of them for free from a website of Jeff Rosenstock's record label, [Quote Unquote Records](http://www.quoteunquoterecords.com/).
 
