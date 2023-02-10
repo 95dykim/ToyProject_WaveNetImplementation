@@ -302,7 +302,7 @@ model.compile(loss=loss, optimizer=optim)
 class CustomSaver(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs={}):
         if (epoch+1)%100 == 0:
-            self.model.save("./checkpoints/"+SAVENAME+"_checkpoint-{}.h5".format(epoch))
+            self.model.save("./checkpoints/"+SAVENAME+"_checkpoint-{}.h5".format(epoch+1))
 customsaver = CustomSaver()
 
 history = model.fit(train_ds, epochs=50000, validation_data=valid_ds, callbacks=[customsaver])#, LR_Scheduler] )
