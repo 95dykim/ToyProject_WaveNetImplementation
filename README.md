@@ -20,7 +20,7 @@ tensorflow-datasets
 pydub
 
 # Dataset
-I have used the following albums as a training dataset:
+Beside of groove dataset, I have used the following albums as a training dataset:
 - The Arrogant Sons of Bitches - Three Cheers for Disappointment
 - Bomb the Music Industry! - Album Minus Band
 - Bomb the Music Industry! - Goodbye Cool World!
@@ -36,7 +36,8 @@ I have used the following albums as a training dataset:
 
 You can download all of them for free from a website of Jeff Rosenstock's record label, [Quote Unquote Records](http://www.quoteunquoterecords.com/).
 
-
+In order to use load_dataset_rosenstock function, mp3 file paths should follow this format:
+./dataset/rosenstock/(AlbumName)/(AudiofileName).mp3
 
 If you're planning to use the same dataset as I did or simply liked the music, then consider supporting him by buying the albums or donating to the label!
 
