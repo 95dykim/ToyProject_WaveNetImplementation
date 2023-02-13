@@ -20,7 +20,7 @@ tensorflow-datasets
 pydub
 
 # Dataset
-Beside of groove dataset, I have used the following albums as a training dataset:
+Beside of [groove dataset](https://magenta.tensorflow.org/datasets/groove), I have used the following albums as a training dataset:
 - The Arrogant Sons of Bitches - Three Cheers for Disappointment
 - Bomb the Music Industry! - Album Minus Band
 - Bomb the Music Industry! - Goodbye Cool World!
