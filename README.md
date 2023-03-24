@@ -5,17 +5,15 @@ An unofficial tensorflow/keras implementation of [WaveNet: A Generative Model Fo
 
 
 # Requirements
-python
+tensorflow>=2.9.0
 
-tensorflow
+tensorflow-datasets>=4.8.0
 
-librosa
+librosa>=0.9
 
-numpy
+numpy>=1.22.0
 
-pandas
-
-tensorflow-datasets
+pandas>=1.4.0
 
 pydub
 
