@@ -41,10 +41,10 @@ In order to use load_dataset_rosenstock function, mp3 file paths should follow t
 
 If you're planning to use the same dataset as I did or simply liked the music, then consider supporting him by buying the albums or donating to the label!
 
-# Result Examples
+# Results
 
 https://user-images.githubusercontent.com/115688680/218380283-0825a8e1-5ec8-4833-bb7b-c5bf73402e9f.mp4
 
 https://user-images.githubusercontent.com/115688680/218380290-81c3d0e6-a46e-4d74-a25d-ad41b90f8e3a.mp4
 
-from groove dataset
+These are generated audio samples by Unconditional WaveNet trained in 10000 epochs with groove dataset.
