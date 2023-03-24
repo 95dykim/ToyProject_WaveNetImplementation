@@ -31,6 +31,9 @@ LABEL_DEPTH = 0
 SAVENAME = "WaveNet_rosenstock_{}_{}_{}_{}".format(NUM_BLOCKS, DILATION_LIMIT, QUANT_B, OUT_SIZE)
 
 ########################################################################################################
+# TODO
+# Add comments...
+########################################################################################################
 
 def load_dataset_rosenstock(hz=22050):
     # Original Dataset
