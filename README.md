@@ -46,3 +46,9 @@ https://user-images.githubusercontent.com/115688680/218380283-0825a8e1-5ec8-4833
 https://user-images.githubusercontent.com/115688680/218380290-81c3d0e6-a46e-4d74-a25d-ad41b90f8e3a.mp4
 
 These are generated audio samples by Unconditional WaveNet trained in 10000 epochs with groove dataset.
+
+# Notes
+
+I have not asked for the musician's permission on using his works to train this DL model. In order to respect his ownership of his music, I kept this repository private most of the time.
+
+However, since I decided to include this particulary page as a part of my resume, **this repository is made public only temporarily.**
