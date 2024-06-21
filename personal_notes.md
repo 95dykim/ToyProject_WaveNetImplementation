@@ -56,7 +56,7 @@ groove 데이터셋으로 훈련시킨 결과는 그럴듯하지만 다양성이
 
 [Epoch 50000](https://user-images.githubusercontent.com/115688680/218381676-750ed747-98b5-4013-9c8e-d833e8b6e892.mp4)
 
-[비교대상](https://www.youtube.com/watch?v=InCYJiM3Zz0)
+[비교대상](https://www.youtube.com/watch?v=78LqhFu32DY)
 
 
 기대한것 만큼 좋은 결과가 나지 않아서 아쉽다. 악기 소리와 목소리와 비슷한 소리들이 나오지만 잡음이 너무 끼어있다. 모델 훈련에 시간이 너무 오래 걸리고 또 음악이 드럼 소리보다는 더 복잡하다 보니 데이터의 샘플링 레이트를 10000, quantization 비트를 64로 설정했었는데 이것이 오히려 잡음만 내는 결과를 준 것 같다.
