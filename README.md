@@ -51,4 +51,4 @@ These are generated audio samples by Unconditional WaveNet trained for 10000 epo
 
 I have not asked for the musician's permission on using his works to train this DL model. In order to respect his ownership of his music, I kept this repository private most of the time.
 
-However, since I decided to include this particulary page as a part of my resume, **this repository is made public only temporarily.**
+However, since I decided to include this particular page as a part of my resume, **this repository is made public only temporarily.**
