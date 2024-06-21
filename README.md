@@ -1,7 +1,7 @@
 # TF_WaveNet
 An unofficial tensorflow/keras implementation of [WaveNet: A Generative Model For Raw Audio (Oord et al, 2016)](https://arxiv.org/abs/1609.03499)
 
-[Some personal notes regarding my implementation of the model (Written in Korean)](https://95dykim.github.io/2023_WaveNet.html)
+[Some personal notes regarding my implementation of the model (Written in Korean)](https://github.com/95dykim/TF_WaveNet/blob/main/personal_notes.md)
 
 
 # Requirements
