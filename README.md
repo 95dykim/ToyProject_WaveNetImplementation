@@ -1,4 +1,4 @@
-# TF_WaveNet
+# Toy Project - Tensorflow Implementation of WaveNet
 An unofficial tensorflow/keras implementation of [WaveNet: A Generative Model For Raw Audio (Oord et al, 2016)](https://arxiv.org/abs/1609.03499)
 
 [Some personal notes regarding my implementation of the model (Written in Korean)](https://github.com/95dykim/ToyProject_WaveNetImplementation/blob/main/personal_notes.md)
