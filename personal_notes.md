@@ -1,7 +1,5 @@
 # Audio Synthesis - WaveNet 구현과 학습
 
-[Github Link](https://github.com/95dykim/TF_WaveNet)
-
 ## 모델 구현
 
 모델 구현은 별로 어렵지 않았다. 하지만 하이퍼패러미터가 문제였다.
@@ -46,7 +44,7 @@ Global Conditional WaveNet 역시 구현했지만, 모든 학습은 Unconditiona
 
 [Epoch 10000](https://user-images.githubusercontent.com/115688680/218380290-81c3d0e6-a46e-4d74-a25d-ad41b90f8e3a.mp4)
 
-groove 데이터셋으로 훈련시킨 결과는 그럴듯하지만 다양성이 부족하다고 느껴졌다. 사실 드럼 소리라고 해서 한 소리만 나는 것이 아니다보니 Unconditional WaveNet에서는 이렇게 훈련되는 것이 당연할 것이다. 아마 피아노 소리로 테스트를 해봐야 하지 않았나 싶다.
+groove 데이터셋으로 훈련시킨 결과는 그럴듯하지만 다양성이 부족하다고 느껴졌다. 사실 드럼 소리라고 해서 한 소리만 나는 것이 아니다보니 Unconditional WaveNet에서는 이렇게 훈련되는 것이 당연할 것이다.
 
 ### b. rosenstock 데이터셋
 
