@@ -1,7 +1,3 @@
----
-layout: default
----
-
 # Audio Synthesis - WaveNet 구현과 학습
 
 [Github Link](https://github.com/95dykim/TF_WaveNet)
