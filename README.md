@@ -45,7 +45,7 @@ https://user-images.githubusercontent.com/115688680/218380283-0825a8e1-5ec8-4833
 
 https://user-images.githubusercontent.com/115688680/218380290-81c3d0e6-a46e-4d74-a25d-ad41b90f8e3a.mp4
 
-These are generated audio samples by Unconditional WaveNet trained in 10000 epochs with groove dataset.
+These are generated audio samples by Unconditional WaveNet trained for 10000 epochs with groove dataset.
 
 # Notes
 
